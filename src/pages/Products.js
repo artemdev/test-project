@@ -11,7 +11,11 @@ import ReactPaginate from "react-paginate";
 import { PER_PAGE } from "../config";
 
 import productsOperations from "../store/products-operations";
-import { addProduct } from "../store/cart.js";
+import {
+  addProduct,
+  increaseQuantity,
+  descreaseQuantity,
+} from "../store/cart.js";
 
 function Products({ currentProducts }) {
   const dispatch = useDispatch();
@@ -20,6 +24,7 @@ function Products({ currentProducts }) {
     <ListGroup as="ol" className="w-75 mx-auto">
       {currentProducts &&
         currentProducts.map((product) => {
+          product.quantity = 1;
           return (
             <ListGroup.Item as="li" className="p-3" key={product.id}>
               <Row>

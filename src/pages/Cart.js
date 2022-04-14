@@ -13,7 +13,10 @@ import ListGroup from "react-bootstrap/ListGroup";
 import Modal from "react-bootstrap/Modal";
 
 import { getCardProducts } from "../store/card-selectors.js";
-
+import {
+  increaseQuantity,
+  descreaseQuantity,
+} from "../store/card-selectors.js";
 export default function Cart() {
   const [show, setShow] = useState(false);
 
@@ -35,7 +38,6 @@ export default function Cart() {
               className="d-flex justify-content-between align-items-start border-0 p-0"
             >
               <Container fluid="md" className="p-2">
-                {console.log(products)}
                 {products.map((product) => {
                   return (
                     <>
@@ -85,6 +87,7 @@ export default function Cart() {
                         >
                           <InputGroup size="sm" style={{ width: "5rem" }}>
                             <Button
+                              onClick={increaseQuantity}
                               variant="outline-secondary"
                               style={{
                                 fontSize: "0.6rem",
@@ -98,9 +101,12 @@ export default function Cart() {
                               style={{
                                 fontSize: "0.7rem",
                               }}
+                              placeholder={product.quantity}
                             />
+
                             <Button
                               variant="outline-secondary"
+                              className={decreaseQuantity}
                               style={{
                                 fontSize: "0.6rem",
                               }}
