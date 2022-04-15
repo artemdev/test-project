@@ -15,48 +15,56 @@ import OldPrice from "./OldPrice";
 import ApplyCouponBtn from "./ApplyCoupon";
 import DiscountModal from "./DiscountModal";
 
-import { getCardProducts } from "../store/card-selectors.js";
+import {
+  getCardProducts,
+  currentProduct,
+  currentCoupon,
+  appliedCoupons,
+} from "../store/card-selectors.js";
 import {
   increaseQuantity,
   decreaseQuantity,
   removeProduct,
+  applyVoucher,
+  setCurrentProduct,
+  setCurrentCoupon,
 } from "../store/cart.js";
-import { FOCUSABLE_SELECTOR } from "@testing-library/user-event/dist/utils";
 
 export default function Cart() {
+  const dispatch = useDispatch();
+
   const [show, setShow] = useState(false);
-  const [currentCoupon, setCurrentCoupon] = useState(null);
-  const [currentProduct, setCurrentProduct] = useState(null);
   const handleClose = () => setShow(false);
-  const applyCoupon = () => {
-    // find coupon  by id
-    //
-    const currentCouponFull = currentProduct.vouchers.find(
-      (voucher) => voucher.id === currentCoupon
-    );
-    console.log(currentCouponFull);
-    // setShow(false);
+
+  const priceWithDiscount = (product) => {
+    const totalPrice = Math.ceil(product.price * product.quantity);
+
+    if (!product.vouchers) {
+      return totalPrice;
+    }
+
+    const discount = product.vouchers.reduce((acc, voucher) => {
+      product.appliedVouchers.includes(voucher) && (acc += voucher.discount);
+      return acc;
+    }, 0);
+
+    return totalPrice - discount;
   };
+
   const addCurrentProduct = (product) => {
     setShow(true);
-    setCurrentProduct(product);
-    console.log("current product is", currentProduct);
+    dispatch(setCurrentProduct(product));
   };
   const changeCouponId = (e) => {
-    const couponId = e.target.value;
-    setCurrentCoupon(couponId);
-    console.log("current coupon is", currentCoupon);
+    const couponName = e.target.value;
+    dispatch(setCurrentCoupon(couponName));
   };
 
   const handleShow = (product, couponId) => {
-    console.log(product, couponId);
     setShow(true);
-    // setShow({ product, couponId });
-    // console.log("show is setted to", show);
   };
   const products = useSelector(getCardProducts);
-
-  const dispatch = useDispatch();
+  const product = useSelector(currentProduct);
   return (
     <>
       <Card
@@ -73,6 +81,9 @@ export default function Cart() {
             >
               <Container fluid="md" className="p-2">
                 {products.map((product) => {
+                  const totalPrice = Math.ceil(
+                    product.price * product.quantity
+                  );
                   return (
                     <div key={"card" + product.id}>
                       <Row className="py-2 m-0">
@@ -110,10 +121,13 @@ export default function Cart() {
                           xs={6}
                         >
                           <h6 className="mb-0 me-2 text-danger">
-                            ${Math.ceil(product.price * product.quantity)}
+                            ${priceWithDiscount(product)}
                           </h6>
 
-                          <OldPrice price={product.price * product.quantity} />
+                          <OldPrice
+                            show={priceWithDiscount(product) !== totalPrice}
+                            price={totalPrice}
+                          />
                         </Col>
                         <Col
                           className="d-flex justify-content-center align-items-center py-2"
@@ -165,7 +179,7 @@ export default function Cart() {
                               product.vouchers.length > 0 ? false : true
                             }
                             product={product}
-                            applyCoupon={applyCoupon}
+                            applyCoupon={applyVoucher}
                             handleShow={handleShow}
                             handleClose={handleClose}
                             addCurrentProduct={() => {
@@ -245,7 +259,10 @@ export default function Cart() {
         changeCouponId={changeCouponId}
         show={show}
         handleClose={handleClose}
-        applyCoupon={applyCoupon}
+        applyCoupon={() => {
+          dispatch(applyVoucher(product.id));
+          handleClose();
+        }}
       />
     </>
   );

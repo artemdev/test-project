@@ -3,25 +3,20 @@ import { createSlice } from "@reduxjs/toolkit";
 export const cartSlice = createSlice({
   name: "cart",
   initialState: {
-    products: [
-      // {
-      //   //   id: "62066c40496d28ee6a659843",
-      //   //   name: "Soprano",
-      //   //   price: 1127.95,
-      //   //   image: "https://loremflickr.com/480/600/product?random=0",
-      //   //   vouchers: [],
-      // },
-    ],
+    products: [],
+    currentProduct: null,
+    currentCoupon: null,
   },
   reducers: {
     addProduct: (state, { payload }) => {
-      //set quantity of new product
       const updatedProduct = {
         ...payload,
         quantity: payload.quantity
           ? (payload.quantity += 1)
           : (payload.quantity = 1),
+        appliedVouchers: [],
       };
+
       if (!state.products.find((product) => product.id === updatedProduct.id)) {
         state.products.push(updatedProduct);
       }
@@ -43,11 +38,24 @@ export const cartSlice = createSlice({
           : null
       );
     },
-    applyVoucher: (state, action) => {
-      //
+    applyVoucher: (state, _action) => {
+      state.products.forEach((product) => {
+        const currentCouponFull =
+          state.currentProduct.vouchers.find(
+            (voucher) => voucher.name === state.currentCoupon
+          ) || null;
+        !product.appliedVouchers.find(
+          (coupon) => coupon.id === currentCouponFull.id
+        ) && product.appliedVouchers.push(currentCouponFull);
+      });
     },
-    productsPurchased: (state, action) => {
-      //
+    productsPurchased: (state, action) => {},
+
+    setCurrentProduct: (state, action) => {
+      state.currentProduct = action.payload;
+    },
+    setCurrentCoupon: (state, action) => {
+      state.currentCoupon = action.payload;
     },
   },
 });
@@ -59,6 +67,8 @@ export const {
   decreaseQuantity,
   applyVoucher,
   productsPurchased,
+  setCurrentProduct,
+  setCurrentCoupon,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

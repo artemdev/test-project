@@ -9,7 +9,7 @@
     - DONE Button to remove product from cart
     - DONE Button to add a voucher to each individual product (voucher is applicable per product)
     - DONE Some products must not allow adding voucher, the button must be hidden
-    * After a voucher is applied the product price must be changed accordingly (show both: price before and after)
+    - DONE After a voucher is applied the product price must be changed accordingly (show both: price before and after)
   * A form with billing information
     - Name
     - Email
