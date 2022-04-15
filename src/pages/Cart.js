@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -10,19 +10,53 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import ListGroup from "react-bootstrap/ListGroup";
-import Modal from "react-bootstrap/Modal";
+
+import OldPrice from "./OldPrice";
+import ApplyCouponBtn from "./ApplyCoupon";
+import DiscountModal from "./DiscountModal";
 
 import { getCardProducts } from "../store/card-selectors.js";
 import {
   increaseQuantity,
-  descreaseQuantity,
-} from "../store/card-selectors.js";
+  decreaseQuantity,
+  removeProduct,
+} from "../store/cart.js";
+import { FOCUSABLE_SELECTOR } from "@testing-library/user-event/dist/utils";
+
 export default function Cart() {
   const [show, setShow] = useState(false);
-
+  const [currentCoupon, setCurrentCoupon] = useState(null);
+  const [currentProduct, setCurrentProduct] = useState(null);
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const applyCoupon = () => {
+    // find coupon  by id
+    //
+    const currentCouponFull = currentProduct.vouchers.find(
+      (voucher) => voucher.id === currentCoupon
+    );
+    console.log(currentCouponFull);
+    // setShow(false);
+  };
+  const addCurrentProduct = (product) => {
+    setShow(true);
+    setCurrentProduct(product);
+    console.log("current product is", currentProduct);
+  };
+  const changeCouponId = (e) => {
+    const couponId = e.target.value;
+    setCurrentCoupon(couponId);
+    console.log("current coupon is", currentCoupon);
+  };
+
+  const handleShow = (product, couponId) => {
+    console.log(product, couponId);
+    setShow(true);
+    // setShow({ product, couponId });
+    // console.log("show is setted to", show);
+  };
   const products = useSelector(getCardProducts);
+
+  const dispatch = useDispatch();
   return (
     <>
       <Card
@@ -40,8 +74,8 @@ export default function Cart() {
               <Container fluid="md" className="p-2">
                 {products.map((product) => {
                   return (
-                    <>
-                      <Row key={product.id} className="py-2 m-0">
+                    <div key={"card" + product.id}>
+                      <Row className="py-2 m-0">
                         <Col md={1} xs={6}>
                           <Image
                             style={{ maxHeight: "6rem" }}
@@ -56,7 +90,7 @@ export default function Cart() {
                           md={3}
                           xs={6}
                         >
-                          <h6 className="mb-0">Product name</h6>
+                          <h6 className="mb-0">{product.name}</h6>
                           <small style={{ fontSize: "0.7rem" }}>
                             <span className="text-black-50 my-2">
                               Product Code:
@@ -75,10 +109,11 @@ export default function Cart() {
                           md={2}
                           xs={6}
                         >
-                          <h6 className="mb-0 me-2 text-danger">$12.00</h6>
-                          <h6 className="mb-0 text-black-50">
-                            <strike>${product.price}</strike>
+                          <h6 className="mb-0 me-2 text-danger">
+                            ${Math.ceil(product.price * product.quantity)}
                           </h6>
+
+                          <OldPrice price={product.price * product.quantity} />
                         </Col>
                         <Col
                           className="d-flex justify-content-center align-items-center py-2"
@@ -87,7 +122,9 @@ export default function Cart() {
                         >
                           <InputGroup size="sm" style={{ width: "5rem" }}>
                             <Button
-                              onClick={increaseQuantity}
+                              onClick={() =>
+                                dispatch(increaseQuantity({ id: product.id }))
+                              }
                               variant="outline-secondary"
                               style={{
                                 fontSize: "0.6rem",
@@ -102,11 +139,14 @@ export default function Cart() {
                                 fontSize: "0.7rem",
                               }}
                               placeholder={product.quantity}
+                              readOnly={product.quantity}
                             />
 
                             <Button
                               variant="outline-secondary"
-                              className={decreaseQuantity}
+                              onClick={() =>
+                                dispatch(decreaseQuantity({ id: product.id }))
+                              }
                               style={{
                                 fontSize: "0.6rem",
                               }}
@@ -120,26 +160,37 @@ export default function Cart() {
                           md={2}
                           xs={6}
                         >
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={handleShow}
-                          >
-                            Apply Coupon
-                          </Button>
+                          <ApplyCouponBtn
+                            disabled={
+                              product.vouchers.length > 0 ? false : true
+                            }
+                            product={product}
+                            applyCoupon={applyCoupon}
+                            handleShow={handleShow}
+                            handleClose={handleClose}
+                            addCurrentProduct={() => {
+                              addCurrentProduct(product);
+                            }}
+                          />
                         </Col>
                         <Col
                           className="d-flex justify-content-center align-items-center"
                           md={2}
                           xs={6}
                         >
-                          <Button variant="danger" size="sm">
+                          <Button
+                            onClick={() => {
+                              dispatch(removeProduct(product));
+                            }}
+                            variant="danger"
+                            size="sm"
+                          >
                             Remove
                           </Button>
                         </Col>
                       </Row>
                       <hr className="text-black-50 my-2"></hr>
-                    </>
+                    </div>
                   );
                 })}
               </Container>
@@ -190,24 +241,12 @@ export default function Cart() {
           Next
         </Button>
       </Card>
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Product Coupon</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group controlId="formBasicEmail">
-            <Form.Control type="text" placeholder="Enter coupon code" />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Apply Coupon
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <DiscountModal
+        changeCouponId={changeCouponId}
+        show={show}
+        handleClose={handleClose}
+        applyCoupon={applyCoupon}
+      />
     </>
   );
 }

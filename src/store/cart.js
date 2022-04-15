@@ -14,14 +14,34 @@ export const cartSlice = createSlice({
     ],
   },
   reducers: {
-    addProduct: (state, action) => {
-      state.products.push(action.payload);
+    addProduct: (state, { payload }) => {
+      //set quantity of new product
+      const updatedProduct = {
+        ...payload,
+        quantity: payload.quantity
+          ? (payload.quantity += 1)
+          : (payload.quantity = 1),
+      };
+      if (!state.products.find((product) => product.id === updatedProduct.id)) {
+        state.products.push(updatedProduct);
+      }
     },
     removeProduct: (state, action) => {
-      //
+      state.products = state.products.filter(
+        (product) => product.id !== action.payload.id
+      );
     },
-    updateQuantity: (state, action) => {
-      //
+    increaseQuantity: (state, action) => {
+      state.products.map((product) =>
+        product.id === action.payload.id ? (product.quantity += 1) : null
+      );
+    },
+    decreaseQuantity: (state, action) => {
+      state.products.map((product) =>
+        product.id === action.payload.id && product.quantity > 0
+          ? (product.quantity -= 1)
+          : null
+      );
     },
     applyVoucher: (state, action) => {
       //
@@ -35,7 +55,8 @@ export const cartSlice = createSlice({
 export const {
   addProduct,
   removeProduct,
-  updateQuantity,
+  increaseQuantity,
+  decreaseQuantity,
   applyVoucher,
   productsPurchased,
 } = cartSlice.actions;
