@@ -1,0 +1,6 @@
+.required:invalid {
+  border: 2px solid #ece7e8;
+}
+.required:invalid:required {
+  border: 2px solid red;
+}
