@@ -57,6 +57,9 @@ export const cartSlice = createSlice({
     setCurrentCoupon: (state, action) => {
       state.currentCoupon = action.payload;
     },
+    emptyCart: (state, _action) => {
+      state.products = [];
+    },
   },
 });
 
@@ -69,6 +72,7 @@ export const {
   productsPurchased,
   setCurrentProduct,
   setCurrentCoupon,
+  emptyCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

@@ -11,16 +11,16 @@
     - DONE Some products must not allow adding voucher, the button must be hidden
     - DONE After a voucher is applied the product price must be changed accordingly (show both: price before and after)
   * A form with billing information
-    - Name
-    - Email
-    - Phone (validate only format like: +X XX XXX XX)
-    - Address (Country, City, Address, Zip)
-    - All fields are required
+    - DONE Name
+    - DONE Email
+    - DONE Phone (validate only format like: +X XX XXX XX)
+    - DONE Address (Country, City, Address, Zip)
+    - DONE All fields are required
   * Next Button
 - Confirmation Page
-  - The page must show a message with products count and total price to pay
-  - Button to confirm (will reset cart and redirect to products page)
-  - The page is accessible only after user click on 'Next' from Checkout page
+  - DONE The page must show a message with products count and total price to pay
+  - DONE Button to confirm (will reset cart and redirect to products page)
+  - DONE The page is accessible only after user click on 'Next' from Checkout page
 
 # Requirements:
 
