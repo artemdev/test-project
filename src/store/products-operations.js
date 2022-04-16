@@ -4,24 +4,17 @@ import products from "../data/products.json";
 // import { CREATE_ROOM_URL } from "../../helpers/routes";
 // import * as API from '../../services/rooms-api';
 
-const fetchProducts = createAsyncThunk(
+export const fetchProducts = createAsyncThunk(
   "products/fetch",
-  async (products, { _rejectWithValue, _getState }) => {
+  async (_, { _rejectWithValue, _getState }) => {
     return products.map((product) => {
       return { ...product, quantity: 0 };
     });
   }
 );
-const fetchVouchers = createAsyncThunk(
-  "vouchers/fetch",
-  async (_, { rejectWithValue, getState }) => {
-    return true;
-  }
-);
 
 const operations = {
   fetchProducts,
-  fetchVouchers,
 };
 
 export default operations;

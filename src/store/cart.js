@@ -4,16 +4,12 @@ export const cartSlice = createSlice({
   name: "cart",
   initialState: {
     products: [],
-    currentProduct: null,
-    currentCoupon: null,
   },
   reducers: {
     addProduct: (state, { payload }) => {
       const updatedProduct = {
         ...payload,
-        quantity: payload.quantity
-          ? (payload.quantity += 1)
-          : (payload.quantity = 1),
+        quantity: payload.quantity ? payload.quantity++ : 1,
         appliedVouchers: [],
       };
 
@@ -38,24 +34,19 @@ export const cartSlice = createSlice({
           : null
       );
     },
-    applyVoucher: (state, _action) => {
+    applyVoucher: (state, action) => {
+      const currentProduct = action.payload.currentProduct;
+      const currentCoupon = action.payload.currentCoupon;
+
       state.products.forEach((product) => {
         const currentCouponFull =
-          state.currentProduct.vouchers.find(
-            (voucher) => voucher.name === state.currentCoupon
+          currentProduct.vouchers.find(
+            (voucher) => voucher.name === currentCoupon
           ) || null;
         !product.appliedVouchers.find(
           (coupon) => coupon.id === currentCouponFull.id
         ) && product.appliedVouchers.push(currentCouponFull);
       });
-    },
-    productsPurchased: (state, action) => {},
-
-    setCurrentProduct: (state, action) => {
-      state.currentProduct = action.payload;
-    },
-    setCurrentCoupon: (state, action) => {
-      state.currentCoupon = action.payload;
     },
     emptyCart: (state, _action) => {
       state.products = [];
@@ -70,8 +61,6 @@ export const {
   decreaseQuantity,
   applyVoucher,
   productsPurchased,
-  setCurrentProduct,
-  setCurrentCoupon,
   emptyCart,
 } = cartSlice.actions;
 
